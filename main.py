@@ -18,7 +18,6 @@ item_id = sheet_details.get('item_id')
 
 # Base url builder
 base_url = f"https://graph.microsoft.com/v1.0/sites/{site_id}/drive/items/{item_id}"
-print(base_url)
 
 graph: Graph = Graph(azure_settings)
 
@@ -82,7 +81,7 @@ async def adjustTableColumn(tableName, headers):
     finally:
         await graph.client_credential.close()
 
-async def postDataRow(tableName, headers):
+async def postDataRow(tableName, headers, datas = []):
     graph = Graph(azure_settings)
     # Adjust table column
     try:
@@ -91,7 +90,7 @@ async def postDataRow(tableName, headers):
             headers=headers,
             json={
                 "values": [
-                    ["2026-01-12", "api-gateway", 72, "OK"]
+                    datas
                 ]
             }
         )
@@ -110,6 +109,8 @@ async def main():
 
         generated_sheet = f"reports-{datetime.now().strftime("%Y-%m-%d")}"
 
+        test_data = ["200102012", "aasd", "asas", "assaaa"]
+
         # Create sheet
         await createSheet(generated_sheet, headers)
 
@@ -120,7 +121,7 @@ async def main():
         await adjustTableColumn(tableName, headers)
 
         # Create row data
-        await postDataRow(tableName, headers)
+        await postDataRow(tableName, headers, datas=test_data)
 
     finally:
         await graph.client_credential.close()
