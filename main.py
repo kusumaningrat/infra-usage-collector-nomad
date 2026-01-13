@@ -2,33 +2,23 @@ import requests, asyncio, configparser
 from datetime import datetime
 from graph import Graph
 
-site_id = "1fa7f76c-05a1-4781-afe1-151e983cfa90,396378f0-8843-431d-9b1b-17e4446766f0"
-item_id = "01HZMN5BRTE5RUNY6F3FA3M2BTMFGUCCYK"
-base_url = f"https://graph.microsoft.com/v1.0/sites/{site_id}/drive/items/{item_id}"
 
 
-
-# Create table
-# requests.post(
-#     f"{base_url}/workbook/worksheets/Sheet1/tables/add",
-#     headers=headers,
-#     json={"address": "A10:D0", "hasHeaders": True}
-# )
-
-# # Add rows
-# requests.post(
-#     f"{base_url}/workbook/tables/Table1/rows/add",
-#     headers=headers,
-#     json={
-#         "values": [
-#             ["2026-01-12", "api-gateway", 72, "OK"]
-#         ]
-#     }
-# )
 
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
+
+# Azure settings
 azure_settings = config['azure']
+
+# Sheet details
+sheet_details = config['sheet']
+site_id = sheet_details.get('site_id')
+item_id = sheet_details.get('item_id')
+
+# Base url builder
+base_url = f"https://graph.microsoft.com/v1.0/sites/{site_id}/drive/items/{item_id}"
+print(base_url)
 
 graph: Graph = Graph(azure_settings)
 
