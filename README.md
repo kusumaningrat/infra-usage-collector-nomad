@@ -10,7 +10,7 @@ cd <dir_name>
 python3 -m venv venv
 ```
 
-Create config file with
+Create config file
 
 ```
 cat << EOF >> config.cfg
@@ -18,4 +18,8 @@ cat << EOF >> config.cfg
 clientId = <client_id>
 clientSecret = <client_secret>
 tenantId = <tenant_id>
+
+[sheet]
+site_id = <site_id>
+item_id = <item_id>
 ```
