@@ -65,20 +65,19 @@ def getTotalCPUUsagePerNodes():
 
     return cpu_usage
 
-def getTotalMemoryinBytes():
+def getTotalMemoryGiB():
     prom = promeConnect(PROME_URL)
     query = node_query_config.get('total_memory_size')
     result = prom.custom_query(query)
 
-    memory = {}
+    memory_total = {}
 
     for res in result:
         node_ip = res['metric']['instance'].split(':')[0]
-        total_memory = res['value'][1]
-        memory_in_gib = round(float(int(total_memory) / 1024 / 1024 / 1024), 2 )
-        memory[node_ip] = memory_in_gib
+        memory_in_gib = float(res['value'][1]) / 1024**3
+        memory_total[node_ip] = round(memory_in_gib)
 
-    return memory
+    return memory_total
     
 def getTotalMemoryUsagePerNodes():
     prom = promeConnect(PROME_URL)
@@ -95,3 +94,4 @@ def getTotalMemoryUsagePerNodes():
 
     return memory_usage
         
+getTotalMemoryGiB()

@@ -2,7 +2,7 @@ import requests, asyncio, configparser
 from datetime import datetime
 from graph import Graph
 from sheet import createSheet, createTable, adjustTableColumn, postDataRow
-from nodes import getNodesDetail, getTotalCPUCore, getTotalCPUUsagePerNodes, getTotalMemoryinBytes, getTotalMemoryUsagePerNodes
+from nodes import getNodesDetail, getTotalCPUCore, getTotalCPUUsagePerNodes, getTotalMemoryGiB, getTotalMemoryUsagePerNodes
 
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
@@ -31,7 +31,7 @@ async def main():
         nodes = getNodesDetail()
         cpu_total = getTotalCPUCore()
         cpu_usage = getTotalCPUUsagePerNodes()
-        mem_total = getTotalMemoryinBytes()
+        mem_total = getTotalMemoryGiB()
         mem_usage = getTotalMemoryUsagePerNodes()
         
         for node_ip, nodename in nodes.items():
