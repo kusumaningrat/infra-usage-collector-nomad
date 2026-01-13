@@ -2,6 +2,7 @@ import requests, asyncio, configparser
 from datetime import datetime
 from graph import Graph
 from sheet import createSheet, createTable, adjustTableColumn, postDataRow
+from nodes import getNodesDetail, getTotalCPUCore, getTotalCPUUsagePerNodes, getTotalMemoryinBytes, getTotalMemoryUsagePerNodes
 
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
@@ -25,7 +26,24 @@ async def main():
 
         generated_sheet = f"reports-{datetime.now().strftime("%Y-%m-%d")}"
 
-        test_data = ["200102012", "aasd", "asas", "assaaa"]
+        rows = []
+
+        nodes = getNodesDetail()
+        cpu_total = getTotalCPUCore()
+        cpu_usage = getTotalCPUUsagePerNodes()
+        mem_total = getTotalMemoryinBytes()
+        mem_usage = getTotalMemoryUsagePerNodes()
+        
+        for node_ip, nodename in nodes.items():
+            rows.append([
+                nodename,
+                node_ip,
+                cpu_total.get(node_ip, 0),
+                cpu_usage.get(node_ip, 0),
+                mem_total.get(node_ip, 0),
+                mem_usage.get(node_ip, 0)
+            ])
+
 
         # Create sheet
         await createSheet(generated_sheet, headers)
@@ -37,7 +55,7 @@ async def main():
         await adjustTableColumn(tableName, headers)
 
         # Create row data
-        await postDataRow(tableName, headers, datas=test_data)
+        await postDataRow(tableName, headers, rows)
 
     finally:
         await graph.client_credential.close()

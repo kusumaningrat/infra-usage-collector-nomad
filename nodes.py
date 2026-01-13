@@ -22,24 +22,28 @@ def getNodesDetail():
     query = node_query_config.get('nodes_detail')
     result = prom.custom_query(query)
 
+    nodes = {}
 
     for res in result:
         node_ip = res['metric']['instance'].split(':')[0]
         nodename = res['metric']['nodename']
+        nodes[node_ip] = nodename
 
-    return node_ip, nodename
+    return nodes
 
 def getTotalCPUCore():
     prom = promeConnect(PROME_URL)
     query = node_query_config.get('total_cpu_core')
     result = prom.custom_query(query)
 
+    total_cpu = {}
 
     for res in result:
         node_ip = res['metric']['instance'].split(':')[0]
         total_core = res['value'][1]
+        total_cpu[node_ip] = total_core
 
-    return node_ip, total_core
+    return total_cpu
 
 def getTotalCPUUsagePerNodes():
     prom = promeConnect(PROME_URL)
@@ -51,31 +55,43 @@ def getTotalCPUUsagePerNodes():
         step='1h'
     )
 
-    # print(result)
+    cpu_usage = {}
 
     for res in result:
         # cpu_percentages = [round(float(v[1]), 2) for v in res['values']]
+        node_ip = res['metric']['instance'].split(':')[0]
         cpu_percentage = round(float(res['values'][0][1]), 2)
+        cpu_usage[node_ip] = cpu_percentage
 
-    return cpu_percentage
+    return cpu_usage
 
 def getTotalMemoryinBytes():
     prom = promeConnect(PROME_URL)
     query = node_query_config.get('total_memory_size')
     result = prom.custom_query(query)
 
+    memory = {}
+
     for res in result:
+        node_ip = res['metric']['instance'].split(':')[0]
         total_memory = res['value'][1]
         memory_in_gib = round(float(int(total_memory) / 1024 / 1024 / 1024), 2 )
-        return memory_in_gib
+        memory[node_ip] = memory_in_gib
+
+    return memory
     
 def getTotalMemoryUsagePerNodes():
     prom = promeConnect(PROME_URL)
     query = node_query_config.get('memory_usage_per_node')
     result = prom.custom_query(query)
 
+    memory_usage = {}
+
     for res in result:
-        print(res)
+        node_ip = res['metric']['instance'].split(':')[0]
         total_memory = res['value'][1]
         memory_percentage = round(float(total_memory), 2)
-        return memory_percentage
+        memory_usage[node_ip] = memory_percentage
+
+    return memory_usage
+        

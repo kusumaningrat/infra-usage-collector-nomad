@@ -51,7 +51,7 @@ async def createTable(sheetName, headers):
             f"{base_url}/workbook/worksheets/{sheetName}/tables/add",
             headers=headers,
             json={
-                "address": "C3:F3", 
+                "address": "C3:H3", 
                 "hasHeaders": True,
                 }
         )
@@ -72,7 +72,16 @@ async def adjustTableColumn(tableName, headers):
                 f"{base_url}/workbook/tables/{tableName}/headerRowRange",
                 headers=headers,
                 json={
-                    "values": [["Date", "adasd", "asd", "Status"]]
+                    "values": [
+                        [
+                            "NodeName", 
+                            "NodeIP", 
+                            "Total CPU per Nodes", 
+                            "CPU Usage (%)", 
+                            "Total Memory per Nodes", 
+                            "Memory Usage (%)"
+                        ]
+                    ]
                 }
             )
         print("Successfully adjust the table column")
@@ -81,7 +90,7 @@ async def adjustTableColumn(tableName, headers):
     finally:
         await graph.client_credential.close()
 
-async def postDataRow(tableName, headers, datas = []):
+async def postDataRow(tableName, headers, rows):
     graph = Graph(azure_settings)
     # Adjust table column
     try:
@@ -89,9 +98,7 @@ async def postDataRow(tableName, headers, datas = []):
             f"{base_url}/workbook/tables/{tableName}/rows/add",
             headers=headers,
             json={
-                "values": [
-                    datas
-                ]
+                "values": rows
             }
         )
         print(f"Successfully add data: {data}")
