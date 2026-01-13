@@ -17,6 +17,18 @@ node_query_config = config['nodes']
 end_time = datetime.now()
 start_time = end_time - timedelta(days=15)
 
+def getNodesDetail():
+    prom = promeConnect(PROME_URL)
+    query = node_query_config.get('nodes_detail')
+    result = prom.custom_query(query)
+
+
+    for res in result:
+        node_ip = res['metric']['instance'].split(':')[0]
+        nodename = res['metric']['nodename']
+
+    return node_ip, nodename
+
 def getTotalCPUCore():
     prom = promeConnect(PROME_URL)
     query = node_query_config.get('total_cpu_core')
@@ -63,6 +75,7 @@ def getTotalMemoryUsagePerNodes():
     result = prom.custom_query(query)
 
     for res in result:
+        print(res)
         total_memory = res['value'][1]
         memory_percentage = round(float(total_memory), 2)
         return memory_percentage
