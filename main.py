@@ -5,6 +5,7 @@ from utils.sheet import createSheet, createTable, setTableColumns, postDataRow
 from nodes.nodes import build_nodes_rows
 from nomad.nomad_client import build_nomad_rows
 from nomad.nomad_jobs import build_job_rows
+from nomad.nomad_allocs import build_allocs_rows
 
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
@@ -99,6 +100,31 @@ async def main():
 
         await setTableColumns(jobs_table, headers, jobs_column)
         await postDataRow(jobs_table, headers, job_rows)
+
+        # Allocations
+        allocations_column = [
+            "Instance",
+            "Job Name",
+            "Group Name",
+            "Task Name",
+            "Namespace",
+            "Allocations ID",
+            "CPU",
+            "Memory"
+        ]
+
+        allocation_rows = build_allocs_rows()
+
+        allocs_tables = await createTable(
+            sheetName=sheet_name,
+            headers=headers,
+            start_row=3,
+            start_col=21,
+            columns=allocations_column
+        )
+
+        await setTableColumns(allocs_tables, headers, allocations_column)
+        await postDataRow(allocs_tables, headers, allocation_rows)
 
 
     finally:

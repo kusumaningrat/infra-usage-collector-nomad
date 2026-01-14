@@ -47,7 +47,7 @@ def getNomadAllocations():
         running_allocations_per_node = res['value'][1]
         running_allocations[instance] = running_allocations_per_node
 
-    print(running_allocations)
+    # print(running_allocations)
     return running_allocations
 
 def getNomadCPUUsagePerNode():

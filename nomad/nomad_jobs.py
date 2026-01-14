@@ -12,7 +12,7 @@ config = configparser.ConfigParser()
 config.read(['query.cfg'])
 
 # query config
-nomad_cluster_config = config['nomad_job']
+nomad_jobs_config = config['nomad_job']
 
 end_time = datetime.now()
 start_time = end_time - timedelta(days=15)
@@ -21,10 +21,10 @@ def getJobsSummary():
     prom = promeConnect(PROME_URL)
 
     queries = {
-        "running": nomad_cluster_config.get('nomad_job_running_summary'),
-        "failed": nomad_cluster_config.get('nomad_job_failed_summary'),
-        "completed": nomad_cluster_config.get('nomad_job_complete_summary'),
-        "starting": nomad_cluster_config.get('nomad_job_starting_summary')
+        "running": nomad_jobs_config.get('nomad_job_running_summary'),
+        "failed": nomad_jobs_config.get('nomad_job_failed_summary'),
+        "completed": nomad_jobs_config.get('nomad_job_complete_summary'),
+        "starting": nomad_jobs_config.get('nomad_job_starting_summary')
     }
 
     allocations_dict = {}
