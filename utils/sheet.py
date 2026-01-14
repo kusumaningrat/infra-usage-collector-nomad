@@ -100,7 +100,7 @@ async def postDataRow(tableName, headers, rows):
                 "values": rows
             }
         )
-        print(f"Successfully add data: {data}")
+        print(f"Successfully add data")
     except Exception as e:
         print("Error:", e)
     finally:

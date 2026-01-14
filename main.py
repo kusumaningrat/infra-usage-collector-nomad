@@ -4,6 +4,7 @@ from utils.graph import Graph
 from utils.sheet import createSheet, createTable, setTableColumns, postDataRow
 from nodes.nodes import build_nodes_rows
 from nomad.nomad_client import build_nomad_rows
+from nomad.nomad_jobs import build_job_rows
 
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
@@ -28,6 +29,7 @@ async def main():
         sheet_name = f"reports-{datetime.now().strftime('%Y-%m-%d')}"
         await createSheet(sheet_name, headers)
 
+        # Nodes Detail
         nodes_columns = [
             "NodeName",
             "NodeIP",
@@ -50,6 +52,8 @@ async def main():
         await setTableColumns(nodes_table, headers, nodes_columns)
         await postDataRow(nodes_table, headers, nodes_rows)
 
+
+        # Nomad Clients
         nomad_columns = [
             "NodeIP",
             "Nomad Node ID",
@@ -71,6 +75,31 @@ async def main():
 
         await setTableColumns(nomad_table, headers, nomad_columns)
         await postDataRow(nomad_table, headers, nomad_rows)
+
+        # Nomad Clients
+        jobs_column = [
+            "Namespace",
+            "Job Name",
+            "Task Group",
+            "Running",
+            "Completed",
+            "Failed",
+            "Starting"
+        ]
+
+        job_rows = build_job_rows()
+
+        jobs_table = await createTable(
+            sheetName=sheet_name,
+            headers=headers,
+            start_row=3,  # spacing
+            start_col=12,
+            columns=jobs_column
+        )
+
+        await setTableColumns(jobs_table, headers, jobs_column)
+        await postDataRow(jobs_table, headers, job_rows)
+
 
     finally:
         await graph.client_credential.close()
