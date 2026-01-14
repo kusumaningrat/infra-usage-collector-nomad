@@ -1,4 +1,4 @@
-from prom_client import promeConnect
+from util.prom_client import promeConnect
 import os, configparser
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
