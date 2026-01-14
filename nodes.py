@@ -94,4 +94,3 @@ def getTotalMemoryUsagePerNodes():
 
     return memory_usage
         
-getTotalMemoryGiB()
