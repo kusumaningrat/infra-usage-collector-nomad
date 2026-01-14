@@ -1,8 +1,9 @@
 import requests, asyncio, configparser
 from datetime import datetime
 from graph import Graph
-from sheet import createSheet, createTable, adjustTableColumn, postDataRow
-from nodes import getNodesDetail, getTotalCPUCore, getTotalCPUUsagePerNodes, getTotalMemoryGiB, getTotalMemoryUsagePerNodes
+from sheet import createSheet, createTable, setTableColumns, postDataRow
+from nodes import build_nodes_rows
+from nomad_client import build_nomad_rows
 
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
@@ -24,38 +25,52 @@ async def main():
         headers = await init(graph)
         # print(headers)
 
-        generated_sheet = f"reports-{datetime.now().strftime("%Y-%m-%d")}"
+        sheet_name = f"reports-{datetime.now().strftime('%Y-%m-%d')}"
+        await createSheet(sheet_name, headers)
 
-        rows = []
+        nodes_columns = [
+            "NodeName",
+            "NodeIP",
+            "Total CPU",
+            "CPU Usage (%)",
+            "Total Memory (GiB)",
+            "Memory Usage (%)"
+        ]
 
-        nodes = getNodesDetail()
-        cpu_total = getTotalCPUCore()
-        cpu_usage = getTotalCPUUsagePerNodes()
-        mem_total = getTotalMemoryGiB()
-        mem_usage = getTotalMemoryUsagePerNodes()
-        
-        for node_ip, nodename in nodes.items():
-            rows.append([
-                nodename,
-                node_ip,
-                cpu_total.get(node_ip, 0),
-                cpu_usage.get(node_ip, 0),
-                mem_total.get(node_ip, 0),
-                mem_usage.get(node_ip, 0)
-            ])
+        nodes_rows = build_nodes_rows()
 
+        nodes_table = await createTable(
+            sheetName=sheet_name,
+            headers=headers,
+            start_row=3,
+            start_col=3,
+            columns=nodes_columns
+        )
 
-        # Create sheet
-        await createSheet(generated_sheet, headers)
+        await setTableColumns(nodes_table, headers, nodes_columns)
+        await postDataRow(nodes_table, headers, nodes_rows)
 
-        # Create table
-        tableName = await createTable(generated_sheet, headers)
+        nomad_columns = [
+            "NodeIP",
+            "Nomad Node ID",
+            "Status",
+            "Running Allocations",
+            "Nomad CPU Usage (%)",
+            "Nomad Memory Usage (%)"
+        ]
 
-        # Adjust table column
-        await adjustTableColumn(tableName, headers)
+        nomad_rows = build_nomad_rows()
 
-        # Create row data
-        await postDataRow(tableName, headers, rows)
+        nomad_table = await createTable(
+            sheetName=sheet_name,
+            headers=headers,
+            start_row=len(nodes_rows) + 6,  # spacing
+            start_col=3,
+            columns=nomad_columns
+        )
+
+        await setTableColumns(nomad_table, headers, nomad_columns)
+        await postDataRow(nomad_table, headers, nomad_rows)
 
     finally:
         await graph.client_credential.close()

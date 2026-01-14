@@ -94,3 +94,24 @@ def getTotalMemoryUsagePerNodes():
 
     return memory_usage
         
+
+def build_nodes_rows():
+    rows = []
+
+    nodes = getNodesDetail()
+    cpu_total = getTotalCPUCore()
+    cpu_usage = getTotalCPUUsagePerNodes()
+    mem_total = getTotalMemoryGiB()
+    mem_usage = getTotalMemoryUsagePerNodes()
+
+    for node_ip, nodename in nodes.items():
+        rows.append([
+            nodename,
+            node_ip,
+            cpu_total.get(node_ip, 0),
+            cpu_usage.get(node_ip, 0),
+            mem_total.get(node_ip, 0),
+            mem_usage.get(node_ip, 0)
+        ])
+
+    return rows

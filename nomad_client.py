@@ -28,7 +28,10 @@ def getNomadClientsDetail():
         instance = res['metric']['instance'].split(':')[0]
         node_id = res['metric']['node_id']
         node_status = res['metric']['node_status']
-        nomad_clients_detail[instance] = {node_id, node_status}
+        nomad_clients_detail[instance] = {
+            "node_id": node_id,
+            "status": node_status
+        }
 
     return nomad_clients_detail
 
@@ -75,3 +78,22 @@ def getNomadMemoryUsagePerNode():
 
     return nomad_memory_usage
 
+def build_nomad_rows():
+    details = getNomadClientsDetail()
+    allocs = getNomadAllocations()
+    cpu = getNomadCPUUsagePerNode()
+    memory = getNomadMemoryUsagePerNode()
+
+    rows = []
+
+    for node_ip, meta in details.items():
+        rows.append([
+            node_ip,
+            meta["node_id"],
+            meta["status"],
+            allocs.get(node_ip, 0),
+            round(float(cpu.get(node_ip, 0)), 2),
+            memory.get(node_ip, 0)
+        ])
+
+    return rows

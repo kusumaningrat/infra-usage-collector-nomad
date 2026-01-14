@@ -43,47 +43,46 @@ async def createSheet(sheetName, headers):
     finally:
         await graph.client_credential.close()
 
-async def createTable(sheetName, headers):
+def excel_col(n):
+    s = ""
+    while n:
+        n, r = divmod(n - 1, 26)
+        s = chr(65 + r) + s
+    return s
+
+async def createTable(sheetName, headers, start_row, start_col, columns):
     graph = Graph(azure_settings)
     # Create Table
     try:
-        table = requests.post(
+        col_count = len(columns)
+        end_col = excel_col(start_col + col_count - 1)
+
+        address = f"{excel_col(start_col)}{start_row}:{end_col}{start_row}"
+
+        res = requests.post(
             f"{base_url}/workbook/worksheets/{sheetName}/tables/add",
             headers=headers,
             json={
-                "address": "C3:H3", 
-                "hasHeaders": True,
-                }
+                "address": address,
+                "hasHeaders": True
+            }
         )
-        tables = table.json()
-        table_name = tables['name']
-        print(f"Successfully create table: {table_name}")
-        return table_name
+
+        return res.json()["name"]
     except Exception as e:
         print("Error:", e)
     finally:
         await graph.client_credential.close()
 
-async def adjustTableColumn(tableName, headers):
+async def setTableColumns(tableName, headers, columns):
     graph = Graph(azure_settings)
     # Adjust table column
     try:
         requests.patch(
-                f"{base_url}/workbook/tables/{tableName}/headerRowRange",
-                headers=headers,
-                json={
-                    "values": [
-                        [
-                            "NodeName", 
-                            "NodeIP", 
-                            "Total CPU per Nodes", 
-                            "CPU Usage (%)", 
-                            "Total Memory per Nodes", 
-                            "Memory Usage (%)"
-                        ]
-                    ]
-                }
-            )
+            f"{base_url}/workbook/tables/{tableName}/headerRowRange",
+            headers=headers,
+            json={"values": [columns]}
+        )
         print("Successfully adjust the table column")
     except Exception as e:
         print("Error:", e)
