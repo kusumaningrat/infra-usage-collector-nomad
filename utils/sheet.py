@@ -1,6 +1,6 @@
 import requests, asyncio, configparser
 from datetime import datetime
-from util.graph import Graph
+from utils.graph import Graph
 
 
 

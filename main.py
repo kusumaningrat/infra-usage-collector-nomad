@@ -1,7 +1,7 @@
 import requests, asyncio, configparser
 from datetime import datetime
-from util.graph import Graph
-from util.sheet import createSheet, createTable, setTableColumns, postDataRow
+from utils.graph import Graph
+from utils.sheet import createSheet, createTable, setTableColumns, postDataRow
 from nodes.nodes import build_nodes_rows
 from nomad.nomad_client import build_nomad_rows
 
