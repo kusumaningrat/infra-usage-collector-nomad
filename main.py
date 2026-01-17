@@ -1,11 +1,13 @@
 import requests, asyncio, configparser
 from datetime import datetime
 from utils.graph import Graph
-from utils.sheet import createSheet, createTable, setTableColumns, postDataRow
+from utils.sheet import createSheet, createTable, setTableColumns, postDataRow, listWorksheets
 from nodes.nodes import build_nodes_rows
 from nomad.nomad_client import build_nomad_rows
 from nomad.nomad_jobs import build_job_rows
 from nomad.nomad_allocs import build_allocs_rows
+from utils.meta import build_meta_rows
+import json
 
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
@@ -27,8 +29,12 @@ async def main():
         headers = await init(graph)
         # print(headers)
 
-        sheet_name = f"reports-{datetime.now().strftime('%Y-%m-%d')}"
+        sheet_name = f"Reports_{datetime.now().strftime('%Y_%m_%d')}"
+        meta_sheet = "meta"
+
         await createSheet(sheet_name, headers)
+        await createSheet(meta_sheet, headers)
+
 
         # Nodes Detail
         nodes_columns = [
@@ -79,9 +85,9 @@ async def main():
 
         # Nomad Clients
         jobs_column = [
-            "Namespace",
             "Job Name",
             "Task Group",
+            "Namespace",
             "Running",
             "Completed",
             "Failed",
@@ -125,6 +131,24 @@ async def main():
 
         await setTableColumns(allocs_tables, headers, allocations_column)
         await postDataRow(allocs_tables, headers, allocation_rows)
+
+        meta_column = [
+            "Report",
+        ]
+
+
+        meta_rows = await build_meta_rows(headers)
+
+        meta_tables = await createTable(
+            sheetName=meta_sheet,
+            headers=headers,
+            start_row=1,
+            start_col=1,
+            columns=meta_column
+        )
+
+        await setTableColumns(meta_tables, headers, meta_column)
+        await postDataRow(meta_tables, headers, meta_rows)
 
 
     finally:

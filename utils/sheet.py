@@ -2,9 +2,6 @@ import requests, asyncio, configparser
 from datetime import datetime
 from utils.graph import Graph
 
-
-
-
 config = configparser.ConfigParser()
 config.read(['config.cfg', 'config.dev.cfg'])
 
@@ -27,6 +24,22 @@ async def init(graph: Graph):
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
+async def listWorksheets(headers):
+    graph = Graph(azure_settings)
+
+    # List Worksheet
+    try:
+        res = requests.get(
+            f"{base_url}/workbook/worksheets",
+            headers=headers,
+        )
+        data = res.json()
+        return [sheet["name"] for sheet in data.get("value", [])]
+    except Exception as e:
+        print("Error:", e)
+    finally:
+        await graph.client_credential.close()
+
 
 async def createSheet(sheetName, headers):
     graph = Graph(azure_settings)

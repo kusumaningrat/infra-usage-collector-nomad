@@ -20,8 +20,8 @@ class Graph:
     async def get_app_only_token(self):
         graph_scope = 'https://graph.microsoft.com/.default'
         access_token = await self.client_credential.get_token(graph_scope)
-        # print(access_token.token)
         return access_token.token
     
     async def close(self):
         await self.close()
+        
