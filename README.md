@@ -60,3 +60,13 @@ nomad_allocs_cpu_allocated = nomad_client_allocs_cpu_allocated
 nomad_allocs_memory_allocated = nomad_client_allocs_memory_allocated
 nomad_allocs_memory_max_usage = nomad_client_allocs_memory_max_usage
 ```
+
+Then, run it
+
+`python3 main.py`
+
+See example result:
+
+![Nodes Usage](test/01.jpg)
+
+![Nomad Usage](test/02.jpg)
