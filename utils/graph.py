@@ -1,27 +1,27 @@
-from configparser import SectionProxy
+from typing import Dict
 from azure.identity.aio import ClientSecretCredential
 from msgraph import GraphServiceClient
 from msgraph.generated.users.users_request_builder import UsersRequestBuilder
 
 class Graph:
-    settings: SectionProxy
-    client_credential: ClientSecretCredential
-    app_client: GraphServiceClient
+    def __init__(self, azure_secrets: Dict[str, str]):
+        self.client_id = azure_secrets["clientId"]
+        self.tenant_id = azure_secrets["tenantId"]
+        self.client_secret = azure_secrets["clientSecret"]
 
-    def __init__(self, config):
-        self.settings = config
-        client_id = self.settings['clientId']
-        tenant_id= self.settings['tenantId']
-        client_secret = self.settings['clientSecret']
+        self.client_credential = ClientSecretCredential(
+            tenant_id=self.tenant_id,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+        )
 
-        self.client_credential = ClientSecretCredential(tenant_id, client_id, client_secret)
         self.app_client = GraphServiceClient(self.client_credential)
 
-    async def get_app_only_token(self):
-        graph_scope = 'https://graph.microsoft.com/.default'
-        access_token = await self.client_credential.get_token(graph_scope)
-        return access_token.token
-    
+    async def get_app_only_token(self) -> str:
+        scope = "https://graph.microsoft.com/.default"
+        token = await self.client_credential.get_token(scope)
+        return token.token
+
     async def close(self):
-        await self.close()
+        await self.client_credential.close()
         

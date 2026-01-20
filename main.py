@@ -7,14 +7,16 @@ from nomad.nomad_client import build_nomad_rows
 from nomad.nomad_jobs import build_job_rows
 from nomad.nomad_allocs import build_allocs_rows
 from utils.meta import build_meta_rows
-import json
+from dotenv import load_dotenv
 
+from utils.vault import get_azure_secret
+
+load_dotenv()
+
+# Load config files (non-secret)
 config = configparser.ConfigParser()
-config.read(['config.cfg', 'config.dev.cfg'])
+config.read(["config.cfg", "config.dev.cfg"])
 
-# Azure settings
-azure_settings = config['azure']
-graph: Graph = Graph(azure_settings)
 
 async def init(graph: Graph):
     token = await graph.get_app_only_token()
@@ -24,7 +26,10 @@ async def init(graph: Graph):
     }
 
 async def main():
-    graph = Graph(azure_settings)
+    azure_secrets = get_azure_secret()
+
+    # Init Graph client
+    graph = Graph(azure_secrets)
     try:
         headers = await init(graph)
         # print(headers)
@@ -34,6 +39,25 @@ async def main():
 
         await createSheet(sheet_name, headers)
         await createSheet(meta_sheet, headers)
+
+
+        meta_column = [
+            "Report",
+        ]
+
+
+        meta_rows = await build_meta_rows(headers)
+
+        meta_tables = await createTable(
+            sheetName=meta_sheet,
+            headers=headers,
+            start_row=1,
+            start_col=1,
+            columns=meta_column
+        )
+
+        await setTableColumns(meta_tables, headers, meta_column)
+        await postDataRow(meta_tables, headers, meta_rows)
 
 
         # Nodes Detail
@@ -131,24 +155,6 @@ async def main():
 
         await setTableColumns(allocs_tables, headers, allocations_column)
         await postDataRow(allocs_tables, headers, allocation_rows)
-
-        meta_column = [
-            "Report",
-        ]
-
-
-        meta_rows = await build_meta_rows(headers)
-
-        meta_tables = await createTable(
-            sheetName=meta_sheet,
-            headers=headers,
-            start_row=1,
-            start_col=1,
-            columns=meta_column
-        )
-
-        await setTableColumns(meta_tables, headers, meta_column)
-        await postDataRow(meta_tables, headers, meta_rows)
 
 
     finally:
